@@ -1,5 +1,9 @@
 # stream-api-example
 
+Please edit `index.js` and add `developer-api-key`, and users credentials.
+
+For more details, refer to the [Streams API Documentation](https://api-dev.tradelocker.com/streams-api/socket/docs/index.html).
+
 Install packages:
 
 ```sh
