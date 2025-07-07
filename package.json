@@ -1,6 +1,6 @@
 {
     "name": "stream-api-example",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Example project using Socket.IO client",
     "main": "index.js",
     "type": "module",
@@ -9,7 +9,8 @@
     },
     "dependencies": {
         "socket.io-client": "4.8.1",
-        "axios": "1.8.4"
+        "axios": "1.8.4",
+        "zod": "3.25.73"
     },
     "author": "Tradelocker Ltd.",
     "license": "ISC"

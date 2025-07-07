@@ -1,6 +1,15 @@
 import { io } from "socket.io-client";
 import axios from "axios";
 
+import {
+  AccountStatusMessageSchema,
+  ClosePositionMessageSchema,
+  OpenOrderMessageSchema,
+  PositionMessageSchema,
+  PropertyMessageSchema,
+  TypedMessageSchema,
+} from "./schemas/stream.schema.js";
+
 // Configuration
 const SERVER_URL = "wss://api-dev.tradelocker.com";
 const NAMESPACE = "/streams-api";
@@ -85,8 +94,35 @@ socket.on(socketIoEvents.SUBSCRIPTIONS, (data) => {
   console.log(socketIoEvents.SUBSCRIPTIONS, data);
 });
 
-socket.on(socketIoEvents.STREAM, (data) => {
-  console.log(socketIoEvents.STREAM, data);
+const schemas = {
+  AccountStatus: AccountStatusMessageSchema,
+  ClosePosition: ClosePositionMessageSchema,
+  OpenOrder: OpenOrderMessageSchema,
+  Position: PositionMessageSchema,
+  Property: PropertyMessageSchema,
+};
+
+socket.on(socketIoEvents.STREAM, (event) => {
+  const typedMessageResult = TypedMessageSchema.safeParse(event);
+  if (typedMessageResult.success) {
+    const type = typedMessageResult.data.type;
+    if (!schemas[type]) {
+      console.error(`Unknown event type: ${type}`);
+      return;
+    }
+
+    const { data, success, error } = schemas[type].safeParse(event);
+    if (success) {
+      console.log(`Event: ${type} >`);
+      console.log(data);
+      return;
+    } else {
+      console.error(`Invalid data for event type ${type}:`, error);
+      return;
+    }
+  }
+
+  console.error("Unknown event type or invalid data:", event);
 });
 
 socket.on(socketIoEvents.CONNECTION, (data) => {
@@ -96,19 +132,74 @@ socket.on(socketIoEvents.CONNECTION, (data) => {
 // subscribe to users updates
 const result = await fetchAccessToken(user);
 
-socket.emit(socketIoEvents.SUBSCRIPTIONS, {
-  action: actions.SUBSCRIBE,
-  token: result.token,
-  brandId: user.server,
-  accountId: result.accountId,
-});
+socket.emit(
+  socketIoEvents.SUBSCRIPTIONS,
+  {
+    action: actions.SUBSCRIBE,
+    token: result.token,
+  },
+  (res) => {
+    console.log(`Action '${actions.SUBSCRIBE}' response:`, res);
+  }
+);
 
 // unsubscribe after 30 seconds
-setTimeout(() => {
-  socket.emit(socketIoEvents.SUBSCRIPTIONS, {
-    action: actions.UNSUBSCRIBE,
-    brandId: result.brandId,
-    accountId: result.accountId,
-  });
+// setTimeout(() => {
+//   socket.emit(
+//     socketIoEvents.SUBSCRIPTIONS,
+//     {
+//       action: actions.UNSUBSCRIBE,
+//       brandId: result.brandId,
+//       accountId: result.accountId,
+//     },
+//     (r) => {
+//       console.log(`Action ${actions.UNSUBSCRIBE} response:`, res);
+//     }
+//   );
+//   socket.disconnect();
+// }, 30000 * 100000000000);
+
+// Gracefully handle termination signals (e.g., Ctrl+C)
+process.on("SIGINT", () => {
+  console.log("Received SIGINT. Disconnecting...");
+  disconnect();
+  process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+  console.log("Received SIGTERM. Disconnecting...");
+  disconnect();
+  process.exit(0);
+});
+
+const disconnect = () => {
+  console.log("Unsubscribe...");
+
+  socket.emit(
+    socketIoEvents.SUBSCRIPTIONS,
+    {
+      action: actions.UNSUBSCRIBE,
+      brandId: result.brandId,
+      accountId: result.accountId,
+    },
+    (res) => {
+      console.log(`Action ${actions.UNSUBSCRIBE} response:`, res);
+    }
+  );
+
   socket.disconnect();
-}, 30000);
+  process.exit(0);
+};
+
+// Gracefully handle termination signals (e.g., Ctrl+C)
+process.on("SIGINT", () => {
+  console.log("Received SIGINT. Disconnecting...");
+  disconnect();
+  process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+  console.log("Received SIGTERM. Disconnecting...");
+  disconnect();
+  process.exit(0);
+});
