@@ -1,22 +1,20 @@
-# stream-api-example
+# stream-api-example (deprecated)
 
-Please edit `index.js` and add `developer-api-key`, and users credentials.
+> [!WARNING]
+> This repository is no longer maintained. Use
+> **[TradeLocker/streams-api-docs](https://github.com/TradeLocker/streams-api-docs)** instead.
 
-For more details, refer to the [Streams API Documentation](https://api-dev.tradelocker.com/streams-api/socket/docs/index.html).
+[TradeLocker/streams-api-docs](https://github.com/TradeLocker/streams-api-docs) has everything
+for the Streams API:
 
-Install packages:
+- **Docs:** https://tradelocker.github.io/streams-api-docs/
+- **Contract:** [AsyncAPI 3.0](https://github.com/TradeLocker/streams-api-docs/tree/main/asyncapi)
+- **Examples:**
+  - [Node.js / TypeScript](https://github.com/TradeLocker/streams-api-docs/tree/main/examples/node), which replaces the script in this repository
+  - [Python](https://github.com/TradeLocker/streams-api-docs/tree/main/examples/python)
+  - [Java](https://github.com/TradeLocker/streams-api-docs/tree/main/examples/java)
+  - [C# / .NET](https://github.com/TradeLocker/streams-api-docs/tree/main/examples/csharp)
+- **Local mock server:** [mock-server](https://github.com/TradeLocker/streams-api-docs/tree/main/mock-server)
 
-```sh
-yarn
-yarn start
-```
-
-Tested with:
-
-```sh
-$ node -v
-v20.10.0
-
-$ yarn -v
-1.22.22
-```
+The code here is kept for reference only. It will not be updated, and it does not cover reconnects
+or result codes, which the new examples handle.
